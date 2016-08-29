@@ -1,0 +1,23 @@
+# - v1.0 - Configuration
+near:
+  # block-radius
+  default: 25
+  maxradius: 100
+
+messages:
+  no-console: '&4Command should be used by a player.'
+  no-access: '&4You do not have permission to this command.'
+  player-not-found: '&cPlayer not found.'
+  no-console: '&4Command should be used by a player.'
+  afk: '&8* &3{name}&8 is now afk *'
+  afk: '&8* &3{name}&8 is now afk: {message} *'
+  afk-return: '&8* &3{name}&8 is no longer afk *'
+  hat: '&6Enjoy you new digs!'
+  hat-invalid: '&6Unable to use that for a hat.'
+  not-facing-sign: '&cYou must be facing a sign.'
+  edit-cancel: '&cYou are unable to modify that sign.'
+  near-player-prefix: '&6Nearby players:'
+  near-player: '&3{name}&6 - (&f{distance}m&6)'
+  near-mob-prefix: '&6Nearby Mobs:'
+  near-mob: '&2{name}&6 - (&f{count}&6)'
+  suicide: '&3{name}&f tragically committed suicide today.'
