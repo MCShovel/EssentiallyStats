@@ -1,6 +1,5 @@
 .*
 *.orig
 target/
-pom.xml
 dependency-reduced-pom.xml
 
