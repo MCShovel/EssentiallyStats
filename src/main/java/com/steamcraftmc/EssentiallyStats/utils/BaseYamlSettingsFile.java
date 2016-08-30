@@ -5,11 +5,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -64,6 +69,25 @@ public abstract class BaseYamlSettingsFile {
 
 	public String getRaw(String string) {
 		return this.configFile.getString(string);
+	}
+
+	public List<String> getSections(String parent) {
+		ArrayList<String> all = new ArrayList<String>();
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection(parent);
+        if (section != null) {
+	        Set<String> names = section.getKeys(false);
+	        if (names != null) {
+		        for (String name : names) {
+	        		all.add(name);
+		        }
+	        }
+        }
+        Collections.sort(all, String.CASE_INSENSITIVE_ORDER);
+        return all;
+	}
+
+	public ConfigurationSection getSection(String name) {
+        return plugin.getConfig().getConfigurationSection(name);
 	}
 
 	private YamlConfiguration getConfig(String name, Object def) {

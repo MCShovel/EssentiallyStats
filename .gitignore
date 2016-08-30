@@ -1,5 +1,7 @@
 .*
 *.orig
+bin/
+example/
 target/
 dependency-reduced-pom.xml
 

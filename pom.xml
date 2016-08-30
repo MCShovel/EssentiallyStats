@@ -15,7 +15,7 @@
     </properties>
 
     <build>
-        <finalName>EssentiallyMisc</finalName>
+        <finalName>EssentiallyStats</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>
