@@ -2,12 +2,18 @@ package com.steamcraftmc.EssentiallyStats;
 
 import java.io.*;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+
 import com.steamcraftmc.EssentiallyStats.utils.BaseYamlSettingsFile;
 
 public class MainConfig  extends BaseYamlSettingsFile {
+	private final MainPlugin plugin;
 	private String _worldFolder;
 	
-	public MainConfig(MainPlugin plugin) { super(plugin, "config.yml"); }
+	public MainConfig(MainPlugin plugin) { 
+		super(plugin, "config.yml"); 
+		this.plugin = plugin;
+	}
 
 	public String NoAccess() {
 		return get("messages.no-access", "&4You do not have permission to this command.");
@@ -19,6 +25,20 @@ public class MainConfig  extends BaseYamlSettingsFile {
 
 	public boolean bungeeSupport() {
 		return getBoolean("settings.useBungeeCord", false);
+	}
+	
+	public String getBungeeServerName() throws InvalidConfigurationException {
+		if (!this.bungeeSupport()) {
+			return "n/a";
+		}
+		String serverName = getRaw("settings.serverName");
+		if (serverName == null) {
+			serverName = plugin.getServerName();
+		}
+		if (serverName == null) {
+			throw new InvalidConfigurationException();
+		}
+		return serverName;
 	}
 
 	public void addWorldFolder(File worldFolder) {

@@ -12,42 +12,37 @@ public class JsonStatsData {
 	private final MainPlugin plugin;
 	private final UUID uuid;
 	private final HashMap<String, Long> stats;
-	private final boolean loaded;
 
 	public JsonStatsData(MainPlugin plugin, UUID playerUUID) {
 		this.plugin = plugin;
 		this.uuid = playerUUID;
 		this.stats = new HashMap<String, Long>();
-
-		boolean loaded;
-		try {
-			loaded = Parse();
-		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-			loaded = false;
-		}
-		this.loaded = loaded;
 	}
 	
 	private void debug(String message) {
 		plugin.log(Level.INFO, message);
 	}
-
+	
 	public int count() {
-		return loaded ? -1 : stats.size();
+		return stats.size();
+	}
+	
+	public Map<String, Long> getStats() {
+		return Collections.unmodifiableMap(stats);
 	}
 
-	private boolean Parse() throws IOException {
+	public boolean Parse() throws IOException {
 		File file = new File(plugin.Config.getWorldFolder());
 		if (file.exists()) {
-			File jsonFile = new File(new File(file, "stats"), String.valueOf(uuid) + ".json");
-			if (jsonFile.exists() && jsonFile.isFile()) {
-				String contents = readTextFile(jsonFile);
+			file = new File(new File(file, "stats"), String.valueOf(uuid) + ".json");
+			if (file.exists() && file.isFile()) {
+				String contents = readTextFile(file);
 				loadJsonData(contents);
+				return true;
 			}
 		}
 
+		plugin.log(Level.INFO, "No stats file: " + file.getAbsolutePath());
 		return false;
 	}
 
@@ -88,7 +83,7 @@ public class JsonStatsData {
 			stats.put(key, val.equals(Boolean.TRUE) ? 1L : 0L);
 		}
 		else if (val != null && val instanceof String) {
-			key = key + "." + nameToField((String)val);
+			key = key + "." + stringToKey((String)val);
 			val = 1;
 			debug("Found stat " + key + " = " + String.valueOf(val));
 			stats.put(key, 1L);
@@ -109,7 +104,7 @@ public class JsonStatsData {
 		}
 	}
 
-	private String nameToField(String val) {
+	private String stringToKey(String val) {
 		StringBuilder sb = new StringBuilder();
 		val = val.trim();
 		val = val.replaceAll("\\+", "Plus");

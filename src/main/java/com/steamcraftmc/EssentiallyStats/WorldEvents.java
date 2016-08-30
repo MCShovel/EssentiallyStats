@@ -36,6 +36,7 @@ public class WorldEvents implements Listener {
 	
 	@EventHandler
 	public void onPlayerJoinEvent(PlayerJoinEvent event) {
+		plugin.registerPlayerJoined(event.getPlayer());
 		PlayerStatsInfo pstats = getPlayer(event.getPlayer());
 		pstats.Join();
 	}

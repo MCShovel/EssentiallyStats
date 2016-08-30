@@ -5,9 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
+
+import org.bukkit.configuration.InvalidConfigurationException;
 
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
 import com.steamcraftmc.EssentiallyStats.Controllers.StatsTable;
@@ -23,6 +24,7 @@ public class MySql {
     private String database;
     
     private Connection conn;
+    private List<StatsTable> tables;
 
     public MySql(MainPlugin plugin) {
     	
@@ -88,19 +90,28 @@ public class MySql {
         }
         return null;
     }
+	
+	private String bungeeServer() throws InvalidConfigurationException {
+		return plugin.Config.getBungeeServerName().replaceAll("[^a-zA-Z0-9_]+", "_");
+	}
 
-    private ArrayList<String> getFieldNames(String tableName) throws SQLException {
-    	ArrayList<String> cols = new ArrayList<String>(); 
+	public List<StatsTable> getTables() {
+		return this.tables;
+	}
+
+    private Set<String> getFieldNames(String tableName) throws SQLException {
+    	HashSet<String> cols = new HashSet<String>(); 
 		try (ResultSet rs = this.getResult("SELECT * FROM `" + tableName + "` LIMIT 1;")) {
 			if (rs != null) {
 				ResultSetMetaData rsmd = rs.getMetaData();
 				int columnCount = rsmd.getColumnCount();
 				for (int ix = 1; ix <= columnCount; ix++) {
-					cols.add(rsmd.getColumnLabel(ix));
+					cols.add(rsmd.getColumnLabel(ix).toLowerCase());
 				}
 			}
 		}
-		return cols;
+		
+		return Collections.unmodifiableSet(cols);
     }
     
 	public boolean initSchema() {
@@ -131,9 +142,11 @@ public class MySql {
 				String playerName = t.hasPlayerName() ? "  `playerName` VARCHAR(63) NOT NULL, \n" : "";
 				exec("CREATE TABLE IF NOT EXISTS `" + t.TableName + "` ( \n" +
 					"  `uuid` VARCHAR(40) NOT NULL, \n" + 
-					bungeeKey + playerName + pk + ");"
+					bungeeKey + 
+					"  `created` BIGINT NOT NULL, \n" + 
+					"  `updated` BIGINT NOT NULL, \n" + 
+					playerName + pk + ");"
 				);
-				t.setFieldNames(getFieldNames(t.TableName));
 			}
 		}
 		catch(SQLException ex) {
@@ -142,6 +155,98 @@ public class MySql {
 			return false;
 		}
 
+		this.tables = Collections.unmodifiableList(tables);
 		return true;
+	}
+
+	public void update(StatsTable table, UUID playerUUID, ArrayList<FieldUpdate> updates) throws Exception {
+		String preparedSql = prepareUpdate(table, playerUUID, updates);
+		//plugin.log(Level.INFO, preparedSql);
+
+		try {
+			exec(preparedSql);
+		}
+		catch(SQLException sqe) {
+			if (sqe.getErrorCode() == 1054) {
+				updateSchema(table, playerUUID, updates);
+				exec(preparedSql);
+				return;
+			}
+
+			plugin.log(Level.WARNING, "SQL ERROR #" + sqe.getErrorCode() + ": " + preparedSql + "\n" + sqe.getMessage());
+			throw sqe;
+		}
+	}
+
+	private void updateSchema(StatsTable table, UUID playerUUID, ArrayList<FieldUpdate> updates) throws Exception {
+		Set<String> existingCols = getFieldNames(table.TableName);
+		for (int ix = 0; ix < updates.size(); ix++) {
+			FieldUpdate updt = updates.get(ix);
+			if (existingCols.contains(updt.FieldName)) {
+				continue;
+			}
+			
+			String alter = String.format(
+					"ALTER TABLE `%s` ADD COLUMN %s %s NOT NULL%s;",
+					table.TableName, updt.getField(), updt.getFieldType(),
+					updt.getFieldType() == "BIGINT" ? " DEFAULT 0" : ""
+					);
+			try {
+				exec(alter);
+			}
+			catch (SQLException sqe) {
+				if (sqe.getErrorCode() != 1060) {
+					plugin.log(Level.WARNING, "SQL ERROR #" + sqe.getErrorCode() + ": " + alter + "\n" + sqe.getMessage());
+				}
+			}
+		}
+	}
+
+	private String prepareUpdate(StatsTable table, UUID playerUUID, ArrayList<FieldUpdate> updates) throws Exception {
+		long now = System.currentTimeMillis() / 1000;
+		StringBuilder sb = new StringBuilder();
+
+		// Begin INSERT
+		sb.append("INSERT INTO ");
+		sb.append(table.TableName);
+		sb.append('(');
+		sb.append("`uuid`");
+		sb.append(",`created`");
+		sb.append(",`updated`");
+		if (plugin.Config.bungeeSupport()) {
+			sb.append(",`server`");
+		}
+		for (int ix = 0; ix < updates.size(); ix++) {
+			sb.append(',');
+			sb.append(updates.get(ix).getField());
+		}
+		sb.append(") \n VALUES('");
+		sb.append(playerUUID.toString());
+		sb.append('\'');
+		sb.append(',');
+		sb.append(now);
+		sb.append(',');
+		sb.append(now);
+		if (plugin.Config.bungeeSupport()) {
+			sb.append(",'");
+			sb.append(bungeeServer());
+			sb.append('\'');
+		}
+		for (int ix = 0; ix < updates.size(); ix++) {
+			sb.append(',');
+			sb.append(updates.get(ix).getValue());
+		}
+		sb.append(") \n ON DUPLICATE KEY UPDATE \n");
+		
+		// Begin UPDATE
+		sb.append("`updated` = ");
+		sb.append(now);
+		for (int ix = 0; ix < updates.size(); ix++) {
+			sb.append(',');
+			sb.append(updates.get(ix).getAssignment());
+		}
+		sb.append(';');
+		
+		return sb.toString();
 	}
 }

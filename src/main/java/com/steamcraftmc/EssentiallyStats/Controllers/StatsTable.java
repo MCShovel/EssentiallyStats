@@ -9,10 +9,10 @@ import com.steamcraftmc.EssentiallyStats.MainPlugin;
 public class StatsTable {
 	private final MainPlugin plugin;
 	public final String TableName;
+	public final String Namespace;
 	private final Set<String> _knownFields;  
 	
 	private final boolean _addPlayerName;  
-	private final String _fromList;
 	private final boolean _isInclusive; 
 	private final Set<String> _filtered;  
 	
@@ -22,8 +22,8 @@ public class StatsTable {
 		this._knownFields = new HashSet<String>();
 		
 		ConfigurationSection section = plugin.Config.getSection("tables." + TableName);
+		this.Namespace = section.getString("namespace");
 		this._addPlayerName = section.getBoolean("playerName", false);
-		this._fromList = section.getString("fromList");
 		this._filtered = new HashSet<String>();
 
 		String filter = section.getString("filter");

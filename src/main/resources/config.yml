@@ -8,51 +8,52 @@ mysql:
   database: estats
 
 settings:
-  #retrieves the server-name from bungeecord and uses it as part of the key {uuid, server}
+  # retrieves the server-name from bungeecord and uses it as part of the key {uuid, server}
   useBungeeCord: true
+  # Used to force the file location of minecraft player stats folder, usually detected automatically
+  # worldFolder:
 
 tables:
   estats_playerStats: 
     playerName: true
-    match: 'stat.(\w+)'
+    namespace: 'stat'
   estats_achievement: 
-    match: 'achievement.(\w+)'
+    namespace: 'achievement'
   estats_exploredBiomes: 
-    fromList: 'progress'
-    match: 'achievement.exploreAllBiomes'
+    namespace: 'achievement.exploreAllBiomes.progress'
   estats_killedBy: 
-    match: 'stat.entityKilledBy.([\w\s_]+)'
+    namespace: 'stat.entityKilledBy'
   estats_killed: 
-    match: 'stat.killEntity.([\w\s_]+)'
+    namespace: 'stat.killEntity'
   estats_breakItem: 
-    match: 'stat.breakItem.minecraft.([\w_]+)'
+    namespace: 'stat.breakItem.minecraft'
 
   estats_craftBlock: 
-    match: 'stat.craftItem.minecraft.([\w_]+)'
+    namespace: 'stat.craftItem.minecraft'
     filter: 'blocks-only'
   estats_pickupBlock: 
-    match: 'stat.pickup.minecraft.([\w_]+)'
+    namespace: 'stat.pickup.minecraft'
     filter: 'blocks-only'
   estats_dropBlock: 
-    match: 'stat.drop.minecraft.([\w_]+)'
+    namespace: 'stat.drop.minecraft'
     filter: 'blocks-only'
   estats_mineBlock: 
-    match: 'stat.mineBlock.minecraft.([\w_]+)'
+    namespace: 'stat.mineBlock.minecraft'
   estats_placeBlock: 
-    match: 'stat.useItem.minecraft.([\w_]+)'
+    namespace: 'stat.useItem.minecraft'
     filter: 'blocks-only'
 
   estats_craftItem: 
-    match: 'stat.craftItem.minecraft.([\w_]+)'
+    namespace: 'stat.craftItem.minecraft'
     filter: '!blocks-only'
   estats_pickupItem: 
-    match: 'stat.pickup.minecraft.([\w_]+)'
+    namespace: 'stat.pickup.minecraft'
     filter: '!blocks-only'
   estats_dropItem: 
-    match: 'stat.drop.minecraft.([\w_]+)'
+    namespace: 'stat.drop.minecraft'
     filter: '!blocks-only'
   estats_useItem: 
-    match: 'stat.useItem.minecraft.([\w_]+)'
+    namespace: 'stat.useItem.minecraft'
     filter: '!blocks-only'
 
 # The following names are recognized as "blocks" for "filter: 'blocks-only'",
@@ -60,7 +61,22 @@ tables:
 # You can create as many filters as desired and they will be loaded to match
 # (or not match with prefix '!') based upon the filter.
 filters:
-  blocks-only: [acacia_stairs, activator_rail, anvil, beacon, birch_stairs, bookshelf, brick_block, brick_stairs, brown_mushroom, brown_mushroom_block, cactus, carpet, chest, clay, coal_block, coal_ore, cobblestone, cobblestone_wall, cocoa, command_block, crafting_table, dark_oak_stairs, daylight_detector, deadbush, detector_rail, diamond_block, diamond_ore, dirt, dispenser, double_plant, double_stone_slab, double_wooden_slab, dragon_egg, dropper, emerald_block, emerald_ore, enchanting_table, end_portal, end_portal_frame, end_stone, ender_chest, farmland, fence, fence_gate, furnace, glass, glass_pane, glowstone, gold_block, gold_ore, golden_rail, grass, gravel, hardened_clay, hay_block, heavy_weighted_pressure_plate, hopper, ice, iron_bars, iron_block, iron_ore, jukebox, jungle_stairs, ladder, lapis_block, lapis_ore, leaves, leaves2, lever, light_weighted_pressure_plate, lit_furnace, lit_pumpkin, log, log2, melon_block, monster_egg, mossy_cobblestone, mycelium, nether_brick, nether_brick_fence, nether_brick_stairs, netherrack, noteblock, oak_stairs, obsidian, packed_ice, piston, planks, portal, pumpkin, quartz_block, quartz_ore, quartz_stairs, rail, red_flower, red_mushroom, red_mushroom_block, redstone_block, redstone_lamp, redstone_ore, redstone_torch, sand, sandstone, sandstone_stairs, sapling, slime, snow, snow_layer, soul_sand, sponge, spruce_stairs, stained_glass, stained_glass_pane, stained_hardened_clay, sticky_piston, stone, stone_brick_stairs, stone_button, stone_pressure_plate, stone_slab, stone_stairs, stonebrick, tallgrass, tnt, torch, trapped_chest, tripwire_hook, vine, waterlily, web, wooden_button, wooden_pressure_plate, wooden_slab, wool, yellow_flower]
+  blocks-only: [acacia_stairs, activator_rail, anvil, beacon, birch_stairs, bookshelf, brick_block, brick_stairs,
+  brown_mushroom, brown_mushroom_block, cactus, carpet, chest, clay, coal_block, coal_ore, cobblestone,
+  cobblestone_wall, cocoa, command_block, crafting_table, dark_oak_stairs, daylight_detector, deadbush,
+  detector_rail, diamond_block, diamond_ore, dirt, dispenser, double_plant, double_stone_slab, double_wooden_slab,
+  dragon_egg, dropper, emerald_block, emerald_ore, enchanting_table, end_portal, end_portal_frame, end_stone,
+  ender_chest, farmland, fence, fence_gate, furnace, glass, glass_pane, glowstone, gold_block, gold_ore, golden_rail,
+  grass, gravel, hardened_clay, hay_block, heavy_weighted_pressure_plate, hopper, ice, iron_bars, iron_block,
+  iron_ore, jukebox, jungle_stairs, ladder, lapis_block, lapis_ore, leaves, leaves2, lever,
+  light_weighted_pressure_plate, lit_furnace, lit_pumpkin, log, log2, melon_block, monster_egg, mossy_cobblestone,
+  mycelium, nether_brick, nether_brick_fence, nether_brick_stairs, netherrack, noteblock, oak_stairs, obsidian,
+  packed_ice, piston, planks, portal, pumpkin, quartz_block, quartz_ore, quartz_stairs, rail, red_flower,
+  red_mushroom, red_mushroom_block, redstone_block, redstone_lamp, redstone_ore, redstone_torch, sand, sandstone,
+  sandstone_stairs, sapling, slime, snow, snow_layer, soul_sand, sponge, spruce_stairs, stained_glass,
+  stained_glass_pane, stained_hardened_clay, sticky_piston, stone, stone_brick_stairs, stone_button,
+  stone_pressure_plate, stone_slab, stone_stairs, stonebrick, tallgrass, tnt, torch, trapped_chest, tripwire_hook,
+  vine, waterlily, web, wooden_button, wooden_pressure_plate, wooden_slab, wool, yellow_flower]
 
 messages:
   no-console: '&4Command should be used by a player.'
