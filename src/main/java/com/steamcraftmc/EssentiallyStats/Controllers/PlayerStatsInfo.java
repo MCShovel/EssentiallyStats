@@ -70,7 +70,7 @@ public class PlayerStatsInfo {
 		hasLoaded = true;
 	}
 	
-	public void updateAsync() throws Exception {
+	public void updateAsync(MyTransaction trans) throws Exception {
 		// Load the current json values...
 		JsonStatsData stats = new JsonStatsData(plugin, uniqueId);
 		if (stats.Parse()) {
@@ -78,7 +78,7 @@ public class PlayerStatsInfo {
 			Map<String, Long> newStats = stats.getStats();
 
 			new UpdateChangedStats(plugin, this, oldStats, newStats)
-				.runNow();
+				.apply(trans);
 
 			prevStats = newStats;
 		}

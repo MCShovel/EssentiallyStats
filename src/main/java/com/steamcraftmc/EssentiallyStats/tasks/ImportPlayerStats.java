@@ -3,7 +3,6 @@ package com.steamcraftmc.EssentiallyStats.tasks;
 import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import org.bukkit.command.CommandSender;
