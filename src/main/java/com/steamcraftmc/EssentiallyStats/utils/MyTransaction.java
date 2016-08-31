@@ -14,48 +14,45 @@ public class MyTransaction {
 	}
 
 	public void restart(Connection conn) throws SQLException {
-		if (!_closed) {
-			try { _conn.close(); } 
-			catch (SQLException e) { }
-		}
+		close();
+		
 		_closed = false;
 		_conn = conn;
+		
 		try {
 			_conn.setAutoCommit(false);
 		}
 		catch(Exception ex) {
+			ex.printStackTrace();
 			_closed = true;
 			_conn.close();
+			_conn = null;
 			throw ex;
 		}
 	}
 
 	public void commit() throws SQLException {
-		if (_closed) {
-			return;
-		}
-		
 		try {
 			_conn.commit();
 		}
 		catch(Exception ex) {
+			ex.printStackTrace();
 			try { _conn.rollback(); }
-			catch(Exception e2) { }
+			catch(Exception e2) {
+				e2.printStackTrace();
+			}
 			throw ex;
 		}
 	}
 
 	public void rollback() throws SQLException {
-		if (_closed) {
-			return;
-		}
-		
 		try {
-			_conn.rollback();
+			if (_conn != null) {
+				_conn.rollback();
+			}
 		}
 		catch(Exception ex) {
-			_closed = true;
-			_conn.close();
+			ex.printStackTrace();
 			throw ex;
 		}
 	}
@@ -65,5 +62,18 @@ public class MyTransaction {
         	pst.executeUpdate();
             pst.close();
         }
+	}
+
+	public void close() {
+		try {
+			if (!_closed) {
+				_closed = true;
+				_conn.close();
+				_conn = null;
+			}
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 }

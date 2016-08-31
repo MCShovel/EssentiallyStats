@@ -178,6 +178,7 @@ public class MySql {
 		catch(SQLException sqe) {
 			if (sqe.getErrorCode() == 1054) {
 				trans.commit();
+				trans.close();
 				updateSchema(table, playerUUID, updates);
 				
 				trans.restart(newConn());

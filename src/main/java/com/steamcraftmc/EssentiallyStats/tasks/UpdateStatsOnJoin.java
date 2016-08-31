@@ -7,6 +7,7 @@ import com.steamcraftmc.EssentiallyStats.MainPlugin;
 import com.steamcraftmc.EssentiallyStats.Controllers.PlayerStatsInfo;
 import com.steamcraftmc.EssentiallyStats.utils.ApplyMinValue;
 import com.steamcraftmc.EssentiallyStats.utils.MySqlUpdate;
+import com.steamcraftmc.EssentiallyStats.utils.MyTransaction;
 
 public class UpdateStatsOnJoin  extends BaseRunnable {
 	private final PlayerStatsInfo player;
@@ -20,6 +21,13 @@ public class UpdateStatsOnJoin  extends BaseRunnable {
 	
 	@Override
 	public void runNow() throws Exception {
+		MyTransaction trans = plugin.MySql.beginTransaction();
+		try { apply(trans); }
+		finally
+		{ trans.close(); }
+	}
+
+	public void apply(MyTransaction trans) throws Exception {
 		MySqlUpdate update = new MySqlUpdate(plugin, player.uniqueId);
 		update.updatePlayerName(player.name);
 		
@@ -27,6 +35,6 @@ public class UpdateStatsOnJoin  extends BaseRunnable {
 			update.add(new ApplyMinValue(e.getKey(), e.getValue()));
 		}
 		
-		update.exec();
+		update.exec(trans);
 	}
 }

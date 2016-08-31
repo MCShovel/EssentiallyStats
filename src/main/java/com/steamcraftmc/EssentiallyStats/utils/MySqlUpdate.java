@@ -42,8 +42,7 @@ public class MySqlUpdate {
 		}
 	}
 
-	public void exec() throws Exception {
-		MyTransaction trans = sql.beginTransaction();
+	public void exec(MyTransaction trans) throws Exception {
 		try {
 			for (TableNamespace updt : tableMap.values()) {
 				updt.exec(sql, trans);

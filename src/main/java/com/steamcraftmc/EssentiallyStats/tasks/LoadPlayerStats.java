@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
 import com.steamcraftmc.EssentiallyStats.Controllers.PlayerStatsInfo;
+import com.steamcraftmc.EssentiallyStats.utils.MyTransaction;
 
 public class LoadPlayerStats extends BaseRunnable {
 	private final PlayerStatsInfo pstats;
@@ -20,8 +21,10 @@ public class LoadPlayerStats extends BaseRunnable {
 			runAsync(20);
 			return;
 		}
-		
-		pstats.loadAsync();
+
+		MyTransaction trans = plugin.MySql.beginTransaction();
+		try { pstats.loadAsync(trans); }
+		finally { trans.close(); }
 	}
 	
 	protected boolean retryOnError(Exception error) {

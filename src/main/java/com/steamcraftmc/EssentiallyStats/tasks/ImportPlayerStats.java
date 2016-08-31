@@ -3,12 +3,14 @@ package com.steamcraftmc.EssentiallyStats.tasks;
 import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import org.bukkit.command.CommandSender;
 
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
 import com.steamcraftmc.EssentiallyStats.Controllers.PlayerStatsInfo;
+import com.steamcraftmc.EssentiallyStats.utils.MyTransaction;
 import com.steamcraftmc.EssentiallyStats.utils.NameFetcher;
 
 public class ImportPlayerStats extends BaseRunnable {
@@ -70,22 +72,33 @@ public class ImportPlayerStats extends BaseRunnable {
 			}
 		}
 
-		if (this.index < _todoList.size()) {
-			try {
-				_todoList.get(this.index).loadAsync();
-				counter ++;
-			} 
-			catch(Exception ex) {
-				ex.printStackTrace();
+		MyTransaction trans = plugin.MySql.beginTransaction();
+		try {
+			while (this.index < _todoList.size()) {
+				try {
+					_todoList.get(this.index).loadAsync(trans);
+					counter ++;
+					trans.commit();
+				} 
+				catch(Exception ex) {
+					ex.printStackTrace();
+					trans.rollback();
+				}
+				
+				this.index++;
 			}
-			
-			this.index++;
-			this.runAsync(10);
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
-		else {
+		trans.close();
+		
+		if (this.index >= _todoList.size()) {
 			plugin.log(Level.INFO, "Stats imported " + counter + " file(s).");
 			sendMessage(sender, plugin.Config.format("messages.import-end", "&6Import completed, {count} records imported.",
 					"count", counter));
+		}
+		else {
+			this.runAsync(10);
 		}
 	}
 }

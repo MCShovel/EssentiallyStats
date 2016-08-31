@@ -9,6 +9,7 @@ import com.steamcraftmc.EssentiallyStats.MainPlugin;
 import com.steamcraftmc.EssentiallyStats.tasks.LoadPlayerStats;
 import com.steamcraftmc.EssentiallyStats.tasks.UpdateChangedStats;
 import com.steamcraftmc.EssentiallyStats.tasks.UpdateStatsOnJoin;
+import com.steamcraftmc.EssentiallyStats.utils.MyTransaction;
 
 public class PlayerStatsInfo {
 	private final MainPlugin plugin;
@@ -54,7 +55,7 @@ public class PlayerStatsInfo {
 		return false;
 	}
 
-	public void loadAsync() throws Exception {
+	public void loadAsync(MyTransaction trans) throws Exception {
 		// A very different update on initial join as we ensure all stats in the database are
 		// at minimal set to the value currently in the json file.
 		JsonStatsData stats = new JsonStatsData(plugin, uniqueId);
@@ -64,7 +65,7 @@ public class PlayerStatsInfo {
 		}
 
 		new UpdateStatsOnJoin(plugin, this, prevStats)
-			.runNow();
+			.apply(trans);
 		
 		hasLoaded = true;
 	}
