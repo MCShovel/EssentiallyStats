@@ -10,6 +10,10 @@ mysql:
 settings:
   # retrieves the server-name from bungeecord and uses it as part of the key {uuid, server}
   useBungeeCord: true
+  # number of server ticks (1/20th of a second) between saving player stats, 6000 = 5 minutes
+  updateInterval: 6000
+  # Used to force the bungee-server's name to a specific value instead of asking bungeeCord for the name
+  # serverName:
   # Used to force the file location of minecraft player stats folder, usually detected automatically
   # worldFolder:
 
@@ -56,27 +60,42 @@ tables:
     namespace: 'stat.useItem.minecraft'
     filter: '!blocks-only'
 
+ignore:
+  achievement.exploreAllBiomes: true
+  #uncomment to remove warnings about unmapped stat namespaces...
+  #all: true
+
 # The following names are recognized as "blocks" for "filter: 'blocks-only'",
 # for all not in this list they will match the "filter: '!blocks-only'"
 # You can create as many filters as desired and they will be loaded to match
 # (or not match with prefix '!') based upon the filter.
 filters:
-  blocks-only: [acacia_stairs, activator_rail, anvil, beacon, birch_stairs, bookshelf, brick_block, brick_stairs,
-  brown_mushroom, brown_mushroom_block, cactus, carpet, chest, clay, coal_block, coal_ore, cobblestone,
-  cobblestone_wall, cocoa, command_block, crafting_table, dark_oak_stairs, daylight_detector, deadbush,
-  detector_rail, diamond_block, diamond_ore, dirt, dispenser, double_plant, double_stone_slab, double_wooden_slab,
-  dragon_egg, dropper, emerald_block, emerald_ore, enchanting_table, end_portal, end_portal_frame, end_stone,
-  ender_chest, farmland, fence, fence_gate, furnace, glass, glass_pane, glowstone, gold_block, gold_ore, golden_rail,
-  grass, gravel, hardened_clay, hay_block, heavy_weighted_pressure_plate, hopper, ice, iron_bars, iron_block,
-  iron_ore, jukebox, jungle_stairs, ladder, lapis_block, lapis_ore, leaves, leaves2, lever,
-  light_weighted_pressure_plate, lit_furnace, lit_pumpkin, log, log2, melon_block, monster_egg, mossy_cobblestone,
-  mycelium, nether_brick, nether_brick_fence, nether_brick_stairs, netherrack, noteblock, oak_stairs, obsidian,
-  packed_ice, piston, planks, portal, pumpkin, quartz_block, quartz_ore, quartz_stairs, rail, red_flower,
-  red_mushroom, red_mushroom_block, redstone_block, redstone_lamp, redstone_ore, redstone_torch, sand, sandstone,
-  sandstone_stairs, sapling, slime, snow, snow_layer, soul_sand, sponge, spruce_stairs, stained_glass,
-  stained_glass_pane, stained_hardened_clay, sticky_piston, stone, stone_brick_stairs, stone_button,
-  stone_pressure_plate, stone_slab, stone_stairs, stonebrick, tallgrass, tnt, torch, trapped_chest, tripwire_hook,
-  vine, waterlily, web, wooden_button, wooden_pressure_plate, wooden_slab, wool, yellow_flower]
+  blocks-only: [stone, grass, dirt, cobblestone, planks, sapling, bedrock, flowing_water, water, flowing_lava, lava,
+  sand, gravel, gold_ore, iron_ore, coal_ore, log, log2, leaves, leaves2, sponge, glass, lapis_ore, lapis_block,
+  dispenser, sandstone, noteblock, bed, golden_rail, detector_rail, sticky_piston, web, tallgrass, deadbush, piston,
+  piston_head, wool, piston_extension, yellow_flower, red_flower, brown_mushroom, red_mushroom, gold_block, iron_block,
+  double_stone_slab, stone_slab, brick_block, tnt, bookshelf, mossy_cobblestone, obsidian, torch, fire, mob_spawner,
+  oak_stairs, chest, redstone_wire, diamond_ore, diamond_block, crafting_table, wheat, farmland, furnace, lit_furnace,
+  standing_sign, wooden_door, spruce_door, birch_door, jungle_door, acacia_door, dark_oak_door, ladder, rail,
+  stone_stairs, wall_sign, lever, stone_pressure_plate, iron_door, wooden_pressure_plate, redstone_ore,
+  lit_redstone_ore, unlit_redstone_torch, redstone_torch, stone_button, snow_layer, ice, snow, cactus, clay, reeds,
+  jukebox, fence, spruce_fence, birch_fence, jungle_fence, dark_oak_fence, acacia_fence, pumpkin, netherrack,
+  soul_sand, glowstone, portal, lit_pumpkin, cake, unpowered_repeater, powered_repeater, trapdoor, monster_egg,
+  stonebrick, brown_mushroom_block, red_mushroom_block, iron_bars, glass_pane, melon_block, pumpkin_stem, melon_stem,
+  vine, fence_gate, spruce_fence_gate, birch_fence_gate, jungle_fence_gate, dark_oak_fence_gate, acacia_fence_gate,
+  brick_stairs, stone_brick_stairs, mycelium, waterlily, nether_brick, nether_brick_fence, nether_brick_stairs,
+  nether_wart, enchanting_table, brewing_stand, cauldron, end_portal, end_portal_frame, end_stone, dragon_egg,
+  redstone_lamp, lit_redstone_lamp, double_wooden_slab, wooden_slab, cocoa, sandstone_stairs, emerald_ore, ender_chest,
+  tripwire_hook, tripwire, emerald_block, spruce_stairs, birch_stairs, jungle_stairs, command_block, beacon,
+  cobblestone_wall, flower_pot, carrots, potatoes, wooden_button, skull, anvil, trapped_chest,
+  light_weighted_pressure_plate, heavy_weighted_pressure_plate, unpowered_comparator, powered_comparator,
+  daylight_detector, daylight_detector_inverted, redstone_block, quartz_ore, hopper, quartz_block, quartz_stairs,
+  activator_rail, dropper, stained_hardened_clay, barrier, iron_trapdoor, hay_block, carpet, hardened_clay, coal_block,
+  packed_ice, acacia_stairs, dark_oak_stairs, slime, double_plant, stained_glass, stained_glass_pane, prismarine,
+  sea_lantern, standing_banner, wall_banner, red_sandstone, red_sandstone_stairs, double_stone_slab2, stone_slab2,
+  end_rod, chorus_plant, chorus_flower, purpur_block, purpur_pillar, purpur_stairs, purpur_double_slab, purpur_slab,
+  end_bricks, beetroots, grass_path, end_gateway, repeating_command_block, chain_command_block, frosted_ice, magma,
+  nether_wart_block, red_nether_brick, bone_block, structure_void, structure_block]
 
 messages:
   no-console: '&4Command should be used by a player.'

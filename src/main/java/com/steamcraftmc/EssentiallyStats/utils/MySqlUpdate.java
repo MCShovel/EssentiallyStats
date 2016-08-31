@@ -9,7 +9,7 @@ import com.steamcraftmc.EssentiallyStats.Controllers.StatsTable;
 public class MySqlUpdate {
 	private final MainPlugin plugin;
 	private final MySql sql;
-	private final HashMap<String, TableUpdate> tableMap;
+	private final HashMap<String, TableNamespace> tableMap;
 	
 	public MySqlUpdate(MainPlugin plugin, UUID playerUUID) {
 		this.plugin = plugin;
@@ -17,21 +17,23 @@ public class MySqlUpdate {
 		this.tableMap = new HashMap<>();
 		
 		for (StatsTable tbl : sql.getTables()) {
-			TableUpdate updt = tableMap.get(tbl.Namespace);
+			TableNamespace updt = tableMap.get(tbl.Namespace);
 			if (updt == null) {
-				tableMap.put(tbl.Namespace, new TableUpdate(tbl, playerUUID));
+				tableMap.put(tbl.Namespace, updt = new TableNamespace(playerUUID));
 			}
+
+			updt.addTable(tbl);
 		}
 	}
 	
 	public void updatePlayerName(String playerName) {
-		for (TableUpdate updt : tableMap.values()) {
+		for (TableNamespace updt : tableMap.values()) {
 			updt.addPlayerName(playerName);
 		}
 	}
 	
 	public void add(FieldUpdate update) { 
-		TableUpdate updt = tableMap.get(update.Namespace);
+		TableNamespace updt = tableMap.get(update.Namespace);
 		if (updt != null) {
 			updt.add(update);
 		}
@@ -41,9 +43,16 @@ public class MySqlUpdate {
 	}
 
 	public void exec() throws Exception {
-		for (TableUpdate updt : tableMap.values()) {
-			updt.exec(sql);
+		MyTransaction trans = sql.beginTransaction();
+		try {
+			for (TableNamespace updt : tableMap.values()) {
+				updt.exec(sql, trans);
+			}
+			trans.commit();
+		}
+		catch(Exception ex) {
+			trans.rollback();
+			throw ex;
 		}
 	}
-	
 }

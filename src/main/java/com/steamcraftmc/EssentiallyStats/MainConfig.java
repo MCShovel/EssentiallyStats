@@ -58,4 +58,8 @@ public class MainConfig  extends BaseYamlSettingsFile {
 	public String getWorldFolder() {
 		return _worldFolder;
 	}
+	
+	public int getUpdateInterval() {
+		return getInt("settings.updateInterval", 6000);
+	}
 }

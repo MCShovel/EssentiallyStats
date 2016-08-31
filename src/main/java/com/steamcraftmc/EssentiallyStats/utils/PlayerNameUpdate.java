@@ -3,7 +3,7 @@ package com.steamcraftmc.EssentiallyStats.utils;
 public class PlayerNameUpdate extends FieldUpdate {
 
 	public PlayerNameUpdate(String playerName) {
-		super("playerName", cleanName(playerName));
+		super("player_name", cleanName(playerName));
 	}
 	
 	static String cleanName(String name) {

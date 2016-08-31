@@ -20,7 +20,7 @@ public class JsonStatsData {
 	}
 	
 	private void debug(String message) {
-		plugin.log(Level.INFO, message);
+		//plugin.log(Level.INFO, message);
 	}
 	
 	public int count() {

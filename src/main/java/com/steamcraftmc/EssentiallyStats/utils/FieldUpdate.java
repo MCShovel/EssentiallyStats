@@ -16,12 +16,29 @@ public abstract class FieldUpdate {
 		}
 		
 		this.Namespace = ns;
-		this.FieldName = cleanName(name);
+		this.FieldName = cleanFieldName(name);
 		this.FieldValue = value;
 	}
 	
-	private static String cleanName(String name) {
-		return name.replaceAll("[^a-zA-Z0-9_]+", "_").trim().toLowerCase();
+	public static String cleanFieldName(String val) {
+		StringBuilder sb = new StringBuilder();
+		val = val.trim();
+		val = val.replaceAll("\\+", "Plus");
+		val = val.replaceAll("[^a-zA-Z0-9_]+", "_");
+		int lengthValid = val.length();
+		if (val.charAt(lengthValid - 1) == '_') {
+			lengthValid--;
+		}
+		char prev = '_';
+		for (int ix = 0; ix < lengthValid; ix++) {
+			char ch = val.charAt(ix);
+			if (prev != '_' && ch != '_' && Character.isLowerCase(prev) && Character.isUpperCase(ch)) {
+				sb.append('_');
+			}
+			sb.append(Character.toLowerCase(ch));
+			prev = ch;
+		}
+		return sb.toString();
 	}
 	
 	public String getFieldType() {

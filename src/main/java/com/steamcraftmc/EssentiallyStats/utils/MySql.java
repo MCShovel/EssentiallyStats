@@ -41,12 +41,16 @@ public class MySql {
         closeConnection();
 	}
 
+    private Connection newConn() throws SQLException {
+    	return java.sql.DriverManager.getConnection(
+                "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database + "?autoReconnect=true",
+                this.username, this.password);
+    }
+    
     public Connection getConn() {
         if (!isConnected()) {
             try {
-                this.conn = java.sql.DriverManager.getConnection(
-                        "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database + "?autoReconnect=true",
-                        this.username, this.password);
+                this.conn = newConn();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -75,10 +79,16 @@ public class MySql {
         }
     }
 
+	public MyTransaction beginTransaction() throws SQLException {
+		Connection conn = newConn();
+		return new MyTransaction(conn);
+	}
+
     private void exec(final String query) throws SQLException {
-        PreparedStatement pst = getConn().prepareStatement(query);
-        pst.executeUpdate();
-        pst.close();
+        try (PreparedStatement pst = getConn().prepareStatement(query)) {
+	        pst.executeUpdate();
+	        pst.close();
+        }
     }
 
     private ResultSet getResult(String query) {
@@ -139,7 +149,7 @@ public class MySql {
 		
 		try {
 			for (StatsTable t : tables) {
-				String playerName = t.hasPlayerName() ? "  `playerName` VARCHAR(63) NOT NULL, \n" : "";
+				String playerName = t.hasPlayerName() ? "  `player_name` VARCHAR(63) NOT NULL, \n" : "";
 				exec("CREATE TABLE IF NOT EXISTS `" + t.TableName + "` ( \n" +
 					"  `uuid` VARCHAR(40) NOT NULL, \n" + 
 					bungeeKey + 
@@ -159,17 +169,20 @@ public class MySql {
 		return true;
 	}
 
-	public void update(StatsTable table, UUID playerUUID, ArrayList<FieldUpdate> updates) throws Exception {
+	public void update(MyTransaction trans, StatsTable table, UUID playerUUID, ArrayList<FieldUpdate> updates) throws Exception {
 		String preparedSql = prepareUpdate(table, playerUUID, updates);
 		//plugin.log(Level.INFO, preparedSql);
 
 		try {
-			exec(preparedSql);
+			trans.exec(preparedSql);
 		}
 		catch(SQLException sqe) {
 			if (sqe.getErrorCode() == 1054) {
+				trans.commit();
 				updateSchema(table, playerUUID, updates);
-				exec(preparedSql);
+				
+				trans.restart(newConn());
+				trans.exec(preparedSql);
 				return;
 			}
 

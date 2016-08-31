@@ -4,7 +4,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
@@ -44,7 +43,7 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
 		}
                 
     	_listener = new WorldEvents(this);
-        getServer().getPluginManager().registerEvents(_listener, this);
+    	_listener.start();
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
@@ -81,7 +80,7 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
     
     @Override
     public void onDisable() {
-    	HandlerList.unregisterAll(_listener);
+    	_listener.stop();
     }
 
 }

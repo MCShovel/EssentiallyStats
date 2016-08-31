@@ -14,13 +14,18 @@ public class TableUpdate {
 		this.table = table;
 		this.playerUUID = playerUUID;
 		this.updates = new ArrayList<FieldUpdate>();
+		this._forceUpdate = false;
 	}
 
 	public void addPlayerName(String playerName) {
-		_forceUpdate = true;
+		this._forceUpdate = true;
 		if (table.hasPlayerName()) {
 			updates.add(new PlayerNameUpdate(playerName));
 		}
+	}
+
+	public boolean isMatch(String fieldName) {
+		return table.isMatch(fieldName);
 	}
 	
 	public boolean hasUpdates() {
@@ -31,12 +36,12 @@ public class TableUpdate {
 		updates.add(update);
 	}
 
-	public void exec(MySql sql) throws Exception {
+	public void exec(MySql sql, MyTransaction trans) throws Exception {
 		if (!hasUpdates()) {
 			return;
 		}
 		
-		sql.update(table, playerUUID, updates);
+		sql.update(trans, table, playerUUID, updates);
 	}
 }
 

@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
 import com.steamcraftmc.EssentiallyStats.tasks.LoadPlayerStats;
+import com.steamcraftmc.EssentiallyStats.tasks.UpdateChangedStats;
 import com.steamcraftmc.EssentiallyStats.tasks.UpdateStatsOnJoin;
 
 public class PlayerStatsInfo {
@@ -35,14 +36,26 @@ public class PlayerStatsInfo {
 	}
 
 	public void Quit() {
+		// This will be checked later by calling hasExpired to remove players that log off
+		// for longer than 5 minutes.
 		quitTime = System.currentTimeMillis();
 		hasQuit = true;
 	}
 
+	public boolean hasExpired() {
+		// if the user has been offline for more than 5 minutes, remove them.
+		if (hasQuit && (System.currentTimeMillis() - quitTime) > (1000 * 60 * 5)) {
+			return true;
+		}
+		return false;
+	}
+
 	public void loadAsync() throws Exception {
+		// A very different update on initial join as we ensure all stats in the database are
+		// at minimal set to the value currently in the json file.
 		JsonStatsData stats = new JsonStatsData(plugin, uniqueId);
 		if (stats.Parse()) {
-			plugin.log(Level.INFO, "Loaded stats for user: " + uniqueId + ", found: " + stats.count());
+			plugin.log(Level.FINE, "Loaded stats for user: " + uniqueId + ", found: " + stats.count());
 			prevStats = stats.getStats();
 		}
 
@@ -50,5 +63,19 @@ public class PlayerStatsInfo {
 			.runNow();
 		
 		hasLoaded = true;
+	}
+	
+	public void updateAsync() throws Exception {
+		// Load the current json values...
+		JsonStatsData stats = new JsonStatsData(plugin, uniqueId);
+		if (stats.Parse()) {
+			Map<String, Long> oldStats = prevStats; 
+			Map<String, Long> newStats = stats.getStats();
+
+			new UpdateChangedStats(plugin, this, oldStats, newStats)
+				.runNow();
+
+			prevStats = newStats;
+		}
 	}
 }
