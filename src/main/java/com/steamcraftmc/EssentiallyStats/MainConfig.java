@@ -20,7 +20,11 @@ public class MainConfig  extends BaseYamlSettingsFile {
 	}
 
 	public String PlayerNotFound(String player) {
-		return format("message.player-not-found", "&cPlayer not found.", "player", String.valueOf(player));
+		return format("messages.player-not-found", "&cPlayer not found.", "player", String.valueOf(player));
+	}
+
+	public String ConfigurationError() {
+		return get("messages.configuration-error", "&cConfiguration error.");
 	}
 
 	public boolean bungeeSupport() {

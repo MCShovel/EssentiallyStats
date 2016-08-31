@@ -1,6 +1,9 @@
 package com.steamcraftmc.EssentiallyStats.tasks;
 
 import java.util.logging.Level;
+
+import org.bukkit.command.CommandSender;
+
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
 
 public abstract class BaseRunnable implements Runnable {
@@ -9,6 +12,16 @@ public abstract class BaseRunnable implements Runnable {
 	public BaseRunnable(MainPlugin plugin) {
 		this.plugin = plugin;
 	}
+	
+
+	protected void sendMessage(final CommandSender sender, final String message) {
+		plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+			@Override
+			public void run() { sender.sendMessage(message); }
+		});
+		return;
+	}
+
 	
 	public void runAsync(int delay) {
 		plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, this, delay);

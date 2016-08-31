@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
+import com.steamcraftmc.EssentiallyStats.Controllers.PlayerStatsInfo;
 import com.steamcraftmc.EssentiallyStats.Controllers.StatsTable;
 
 public class MySql {
@@ -32,7 +33,7 @@ public class MySql {
     	loadConfig();
     }
 
-    private void loadConfig() {
+    public void loadConfig() {
         this.host = plugin.Config.get("mysql.host", "localhost");
         this.port = plugin.Config.getInt("mysql.port", 3306);
         this.username = plugin.Config.get("mysql.username", "root");
@@ -91,16 +92,6 @@ public class MySql {
         }
     }
 
-    private ResultSet getResult(String query) {
-        try {
-            PreparedStatement pst = getConn().prepareStatement(query);
-            return pst.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-	
 	private String bungeeServer() throws InvalidConfigurationException {
 		return plugin.Config.getBungeeServerName().replaceAll("[^a-zA-Z0-9_]+", "_");
 	}
@@ -111,22 +102,29 @@ public class MySql {
 
     private Set<String> getFieldNames(String tableName) throws SQLException {
     	HashSet<String> cols = new HashSet<String>(); 
-		try (ResultSet rs = this.getResult("SELECT * FROM `" + tableName + "` LIMIT 1;")) {
+        PreparedStatement pst = getConn().prepareStatement("SELECT * FROM `" + tableName + "` LIMIT 1;");
+		try (ResultSet rs = pst.executeQuery()) {
 			if (rs != null) {
 				ResultSetMetaData rsmd = rs.getMetaData();
 				int columnCount = rsmd.getColumnCount();
 				for (int ix = 1; ix <= columnCount; ix++) {
 					cols.add(rsmd.getColumnLabel(ix).toLowerCase());
 				}
+				rs.close();
 			}
+			pst.close();
+		}
+		catch (Exception ex) {
+			pst.close();
+			throw ex;
 		}
 		
 		return Collections.unmodifiableSet(cols);
     }
-    
+
 	public boolean initSchema() {
 		try {
-			getResult("SELECT 1;").close();
+	        getConn().prepareStatement("SELECT 1;").close();
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
@@ -150,12 +148,13 @@ public class MySql {
 		try {
 			for (StatsTable t : tables) {
 				String playerName = t.hasPlayerName() ? "  `player_name` VARCHAR(63) NOT NULL, \n" : "";
+				String playerIndex = t.hasPlayerName() ? " INDEX `by_player_name` (`player_name`), \n" : "";
 				exec("CREATE TABLE IF NOT EXISTS `" + t.TableName + "` ( \n" +
 					"  `uuid` VARCHAR(40) NOT NULL, \n" + 
 					bungeeKey + 
 					"  `created` BIGINT NOT NULL, \n" + 
 					"  `updated` BIGINT NOT NULL, \n" + 
-					playerName + pk + ");"
+					playerName + playerIndex + pk + ");"
 				);
 			}
 		}
@@ -261,5 +260,112 @@ public class MySql {
 		sb.append(';');
 		
 		return sb.toString();
+	}
+
+	public List<PlayerStatsInfo> lookupPlayerByName(String partial) {
+		ArrayList<PlayerStatsInfo> results = new ArrayList<PlayerStatsInfo>();
+		StatsTable tbl = null;
+		for (int ix = 0; ix < tables.size(); ix++) {
+			if (tables.get(ix).hasPlayerName()) {
+				tbl = tables.get(ix);
+				break;
+			}
+		}
+		
+		if (tbl == null) {
+			return results;
+		}
+
+		String preparedSql = "SELECT uuid, player_name FROM `" + tbl.TableName + "` "
+				+ "WHERE player_name {where} "
+				+ "GROUP BY uuid, player_name "
+				+ "LIMIT 6;";
+		
+		PreparedStatement pst = null;
+		try {
+	        pst = getConn().prepareStatement(
+	        		preparedSql.replace("{where}", "= '" + PlayerNameUpdate.cleanName(partial) + "'"));
+			try (ResultSet rs = pst.executeQuery()) {
+				while (rs != null && rs.next()) {
+					results.add(new PlayerStatsInfo(plugin, UUID.fromString(rs.getString(1)), rs.getString(2)));
+				}
+				if (rs != null)
+					rs.close();
+			}
+			pst.close();
+			
+			if (results.size() == 0) {
+		        pst = getConn().prepareStatement(
+		        		preparedSql.replace("{where}", "LIKE '" + PlayerNameUpdate.cleanName(partial) + "%'"));
+    			try (ResultSet rs = pst.executeQuery()) {
+					while (rs != null && rs.next()) {
+						results.add(new PlayerStatsInfo(plugin, UUID.fromString(rs.getString(1)), rs.getString(2)));
+					}
+					if (rs != null)
+						rs.close();
+				}
+				pst.close();
+			}
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			if (pst != null) {
+				try { pst.close(); } 
+				catch (SQLException e) { }
+			}
+		}
+
+		if (results.size() > 5) {
+			results.clear();
+		}
+
+		return results;
+	}
+
+	public List<Map<String, Long>> fetchAllStats(UUID uniqueId, StatsTable tbl) {
+		HashSet<String> ignore = new HashSet<String>();
+		ignore.add("uuid");
+		ignore.add("player_name");
+		ignore.add("server");
+		ignore.add("created");
+		ignore.add("updated");
+		List<Map<String, Long>> results = new ArrayList<Map<String, Long>>();
+		PreparedStatement pst = null;
+		try {
+	        pst = getConn().prepareStatement("SELECT * FROM `" + tbl.TableName + "` "
+					+ "WHERE uuid = '" + uniqueId + "';");
+
+			try (ResultSet rs = pst.executeQuery()) {
+				if (rs != null) {
+					ResultSetMetaData rsmd = rs.getMetaData();
+					int columnCount = rsmd.getColumnCount();
+					while (rs.next()) {
+						HashMap<String, Long> map = new HashMap<String,Long>();
+						for (int ix = 1; ix <= columnCount; ix++) {
+							String label = rsmd.getColumnLabel(ix).toLowerCase();
+							if (ignore.contains(label)) {
+								continue;
+							}
+							Object val = rs.getObject(ix);
+							if (val instanceof Number) {
+								map.put(label, ((Number)val).longValue());
+							}
+						}
+						results.add(Collections.unmodifiableMap(map));
+					}
+					rs.close();
+				}
+			}
+			pst.close();
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			if (pst != null) {
+				try { pst.close(); } 
+				catch (SQLException e) { }
+			}
+		}
+
+		return results;
 	}
 }

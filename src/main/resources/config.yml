@@ -10,53 +10,73 @@ mysql:
 settings:
   # retrieves the server-name from bungeecord and uses it as part of the key {uuid, server}
   useBungeeCord: true
-  # number of server ticks (1/20th of a second) between saving player stats, 6000 = 5 minutes
-  updateInterval: 6000
   # Used to force the bungee-server's name to a specific value instead of asking bungeeCord for the name
   # serverName:
   # Used to force the file location of minecraft player stats folder, usually detected automatically
   # worldFolder:
+  # number of server ticks (1/20th of a second) between saving player stats, 6000 = 5 minutes
+  updateInterval: 6000
+  # Used to control which stats group is displayed by default
+  defaultCategory: 'Player Stats'
 
 tables:
-  estats_playerStats: 
+  estats_playerStats:
+    category: 'Player Stats'
     playerName: true
     namespace: 'stat'
-  estats_achievement: 
+    canAggregateFields: false
+    timeFields: [timeSinceDeath, sneakTime, playOneMinute]
+  estats_achievement:
+    category: 'Achievements'
     namespace: 'achievement'
-  estats_exploredBiomes: 
+  estats_exploredBiomes:
+    category: 'Biomes Explored'
+    rowAggregate: 'MAX'
     namespace: 'achievement.exploreAllBiomes.progress'
-  estats_killedBy: 
+  estats_killedBy:
+    category: 'Killed By MOBs'
     namespace: 'stat.entityKilledBy'
-  estats_killed: 
+  estats_killed:
+    category: 'MOBs Killed'
     namespace: 'stat.killEntity'
-  estats_breakItem: 
+  estats_breakItem:
+    category: 'Items Broken'
     namespace: 'stat.breakItem.minecraft'
 
-  estats_craftBlock: 
+  estats_craftBlock:
+    category: 'Blocks Crafted'
     namespace: 'stat.craftItem.minecraft'
     filter: 'blocks-only'
-  estats_pickupBlock: 
+  estats_pickupBlock:
+    category: 'Blocks Picked Up'
     namespace: 'stat.pickup.minecraft'
     filter: 'blocks-only'
-  estats_dropBlock: 
+  estats_dropBlock:
+    category: 'Blocks Dropped'
     namespace: 'stat.drop.minecraft'
     filter: 'blocks-only'
-  estats_mineBlock: 
+  estats_mineBlock:
+    category: 'Blocks Broken'
     namespace: 'stat.mineBlock.minecraft'
-  estats_placeBlock: 
+  estats_placeBlock:
+    category: 'Blocks Placed'
     namespace: 'stat.useItem.minecraft'
     filter: 'blocks-only'
 
-  estats_craftItem: 
+  estats_craftItem:
+    category: 'Items Crafted'
     namespace: 'stat.craftItem.minecraft'
     filter: '!blocks-only'
-  estats_pickupItem: 
+  estats_pickupItem:
+    category: 'Items Picked Up'
     namespace: 'stat.pickup.minecraft'
     filter: '!blocks-only'
-  estats_dropItem: 
+  estats_dropItem:
+    category: 'Items Dropped'
     namespace: 'stat.drop.minecraft'
     filter: '!blocks-only'
-  estats_useItem: 
+  estats_useItem:
+    category: 'Items Used'
     namespace: 'stat.useItem.minecraft'
     filter: '!blocks-only'
 

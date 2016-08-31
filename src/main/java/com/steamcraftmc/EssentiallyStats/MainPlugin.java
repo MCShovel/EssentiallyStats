@@ -41,9 +41,11 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
 			setEnabled(false);
 			return;
 		}
-                
+        
     	_listener = new WorldEvents(this);
     	_listener.start();
+    	
+    	new com.steamcraftmc.EssentiallyStats.Commands.CmdStats(this);
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
@@ -71,7 +73,7 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
 
 		if (subchannel.equals("GetServer")) {
 			String name = in.readUTF();
-			if (name != null) {
+			if (name != null && !name.equals(this.bungeeServerName)) {
 				this.bungeeServerName = name;
 				log(Level.INFO, "Received bungee server name: " + name);
 			}
@@ -82,5 +84,13 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
     public void onDisable() {
     	_listener.stop();
     }
+
+	public void reload() {
+		reloadConfig();
+		Config.load();
+		MySql.loadConfig();
+    	_listener.stop();
+    	_listener.start();
+	}
 
 }

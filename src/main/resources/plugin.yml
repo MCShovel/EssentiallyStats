@@ -4,38 +4,10 @@ version: '1.0'
 author: rknapp
 load: startup
 commands:
-  afk:
-    description: Marks you as away-from-keyboard.
-    usage: /<command> [message...]
-    aliases: [away]
-    permission: essentials.afk
-    permission-message: '§4You do not have permission to use this command.'
-    default: true
-  hat:
-    description: Get some cool new headgear.
-    usage: /<command> [remove]
+  stats:
+    description: Report you or another player's current progress.
+    usage: /<command> [player] [category]
     aliases: []
-    permission: essentials.hat
-    permission-message: '§4You do not have permission to use this command.'
-    default: op
-  editsign:
-    aliases: [edit,edittext]
-    description: Changes a line of text on the sign you are looking at.
-    usage: /<command> <line 1-4> new text line
-    permission: essentials.signs.edit
-    permission-message: '§4You do not have permission to use this command.'
-    default: op
-  near:
-    description: Lists the players near by or around a player.
-    usage: /<command> [radius]
-    aliases: [nearby]
-    permission: essentials.near
-    permission-message: '§4You do not have permission to use this command.'
-    default: op
-  suicide:
-    description: Prove your mortality.
-    usage: /<command>
-    aliases: []
-    permission: essentials.suicide
+    permission: essentials.stats
     permission-message: '§4You do not have permission to use this command.'
     default: true

@@ -29,8 +29,9 @@ public class UpdateChangedStats  extends BaseRunnable {
 			String name =e.getKey();
 			Long val = e.getValue();
 			Long old = prev.get(e.getKey());
+			if (old == null) old = 0L;
 
-			if (old == null || old < val) {
+			if (old < val) {
 				update.add(new UpdateStatValue(name, val, val - old));
 			}
 		}

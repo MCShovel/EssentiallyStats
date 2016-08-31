@@ -21,9 +21,13 @@ public class PlayerStatsInfo {
 	private long quitTime;
 
 	public PlayerStatsInfo(MainPlugin plugin, Player player) {
+		this(plugin, player.getUniqueId(), player.getName());
+	}
+
+	public PlayerStatsInfo(MainPlugin plugin, UUID uniqueId, String playerName) {
 		this.plugin = plugin;
-		this.uniqueId = player.getUniqueId();
-		this.name = player.getName();
+		this.uniqueId = uniqueId;
+		this.name = playerName;
 		hasLoaded = false;
 		prevStats = new HashMap<String,Long>();
 	}

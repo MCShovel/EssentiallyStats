@@ -40,6 +40,21 @@ public abstract class FieldUpdate {
 		}
 		return sb.toString();
 	}
+
+
+	public static String toDisplayName(String key) {
+		StringBuilder sb = new StringBuilder();
+		for (String n : key.split("_")) {
+			if (n.length() > 0) {
+				if (sb.length() > 0) {
+					sb.append(' ');
+				}
+				sb.append(Character.toUpperCase(n.charAt(0)));
+				sb.append(n.substring(1));
+			}
+		}
+		return sb.toString();
+	}
 	
 	public String getFieldType() {
 		if (FieldValue instanceof Long) {
