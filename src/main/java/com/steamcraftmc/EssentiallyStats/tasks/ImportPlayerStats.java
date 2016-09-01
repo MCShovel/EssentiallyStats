@@ -27,6 +27,7 @@ public class ImportPlayerStats extends BaseRunnable {
 
 	private String lookupUuid(UUID uuid) throws Exception {
 		ArrayList<UUID> uuidList = new ArrayList<UUID>(); 
+		uuidList.add(uuid);
 		final NameFetcher fetcher = new NameFetcher(uuidList);
 		Map<UUID, String> foundPlayers = null;
 
