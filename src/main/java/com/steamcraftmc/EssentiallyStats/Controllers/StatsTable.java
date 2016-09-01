@@ -70,6 +70,10 @@ public class StatsTable {
 		return _addPlayerName;
 	}
 
+	public String AggregateType() {
+		return _rowAggFunction;
+	}
+	
 	public boolean canSummarize() {
 		return _canAggregateFields;
 	}

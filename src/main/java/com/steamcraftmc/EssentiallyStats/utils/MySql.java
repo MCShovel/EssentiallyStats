@@ -99,6 +99,15 @@ public class MySql {
 	public List<StatsTable> getTables() {
 		return this.tables;
 	}
+	
+	public Set<String> getFields(StatsTable tbl) {
+		try {
+			return this.getFieldNames(tbl.TableName);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return new HashSet<String>();
+		}
+	}
 
     private Set<String> getFieldNames(String tableName) throws SQLException {
     	HashSet<String> cols = new HashSet<String>(); 
@@ -121,6 +130,25 @@ public class MySql {
 		
 		return Collections.unmodifiableSet(cols);
     }
+
+	public StatsTable findTable(String categoryText) {
+		for (StatsTable t : plugin.MySql.getTables()) {
+			if (categoryText.length() >= t.Category.length()) {
+				if (categoryText.substring(0, t.Category.length()).equalsIgnoreCase(t.Category))
+					return t;
+			}
+		}
+		return null;
+	}
+
+	public String findTableField(StatsTable t, String fieldText) {
+		fieldText = FieldUpdate.cleanFieldName(fieldText.trim());
+		Set<String> flds = plugin.MySql.getFields(t);
+		if (flds.contains(fieldText)) {
+			return fieldText;
+		}
+		return null;
+	}
 
 	public boolean initSchema() {
 		try {
@@ -263,6 +291,48 @@ public class MySql {
 		return sb.toString();
 	}
 
+	public Map<UUID, String> lookupPlayerNames(List<UUID> uuids) {
+		StatsTable tbl = null;
+		HashMap<UUID, String> map = new HashMap<UUID, String>();
+		for (StatsTable t : tables) {
+			if (t.hasPlayerName()) {
+				tbl = t;
+				break;
+			}
+		}
+		if (tbl == null) {
+			return map;
+		}
+
+		StringBuilder sbSelect = new StringBuilder();
+		sbSelect.append("SELECT `uuid`, `player_name` FROM `");
+		sbSelect.append(tbl.TableName);
+		sbSelect.append("` WHERE `uuid` IN (");
+		for (int ix = 0; ix < uuids.size(); ix++) {
+			if (ix > 0) sbSelect.append(',');
+			sbSelect.append('\'');
+			sbSelect.append(uuids.get(ix));
+			sbSelect.append('\'');
+		}
+		sbSelect.append(");");
+		
+        try (PreparedStatement pst = getConn().prepareStatement(sbSelect.toString())) {
+			try (ResultSet rs = pst.executeQuery()) {
+				if (rs != null) {
+					while (rs.next()) {
+						map.put(UUID.fromString(rs.getString(1)), rs.getString(2));
+					}
+					rs.close();
+				}
+			}
+			pst.close();
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		return map;
+	}
+
 	public List<PlayerStatsInfo> lookupPlayerByName(String partial) {
 		ArrayList<PlayerStatsInfo> results = new ArrayList<PlayerStatsInfo>();
 		StatsTable tbl = null;
@@ -367,6 +437,58 @@ public class MySql {
 			}
 		}
 
+		return results;
+	}
+
+	public List<NameValuePair<Long>> getTop(StatsTable tbl, String fieldName, int maxResults) throws Exception{
+		
+		ArrayList<NameValuePair<Long>> results = new ArrayList<NameValuePair<Long>>(); 
+
+		try {
+			String key = tbl.hasPlayerName() ? "player_name" : "uuid";
+			String statement = ("SELECT `{key}`, {agg}(`{field}`) `{field}` "
+					+ "FROM `{table}` "
+					+ "GROUP BY uuid "
+					+ "ORDER BY {agg}(`{field}`) DESC "
+					+ "LIMIT 10;")
+					.replace("{table}", tbl.TableName)
+					.replace("{agg}", tbl.AggregateType())
+					.replace("{key}", key)
+					.replace("{field}", fieldName);
+			
+	        try (PreparedStatement pst = getConn().prepareStatement(statement)) {
+				try (ResultSet rs = pst.executeQuery()) {
+					if (rs != null) {
+						while (rs.next()) {
+							Long value = rs.getLong(2);
+							if (value > 0L) {
+								results.add(new NameValuePair<Long>(rs.getString(1), value));
+							}
+						}
+						rs.close();
+					}
+				}
+				pst.close();
+	        }
+	        
+	        if (key == "uuid") {
+	        	ArrayList<UUID> uuids = new ArrayList<UUID>();
+	        	for (NameValuePair<Long> n : results) {
+	        		uuids.add(UUID.fromString(n.Name));
+	        	}
+	        	Map<UUID, String> map = this.lookupPlayerNames(uuids);
+	        	for (int ix = 0; ix < results.size(); ix++) {
+	        		NameValuePair<Long> item = results.get(ix);
+	        		item = new NameValuePair<Long>(map.get(UUID.fromString(item.Name)), item.Value);
+	        		if (item.Name != null)
+	        			results.set(ix, item);
+	        	}
+	        }
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
 		return results;
 	}
 }

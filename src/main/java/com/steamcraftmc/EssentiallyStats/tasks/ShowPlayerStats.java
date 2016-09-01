@@ -24,11 +24,12 @@ public class ShowPlayerStats extends BaseRunnable {
 		if (category != null) {
 			int mul = 1;
 			page = 0;
-			for (int ix = category.length() - 1; Character.isDigit(category.charAt(ix)); ix--) {
+			for (int ix = category.length() - 1; ix >= 0 && Character.isDigit(category.charAt(ix)); ix--) {
 				page += mul * (category.charAt(ix) - '0');
 				mul *= 10;
 				category = category.substring(0, category.length() - 1);
 			}
+			category = category.trim();
 		}
 		this.pageNumber = Math.max(0, page-1);
 		this.category = category;
@@ -50,16 +51,6 @@ public class ShowPlayerStats extends BaseRunnable {
 		return _pstats;
 	}
 
-	private StatsTable getStatsTable() {
-		for (StatsTable tbl : plugin.MySql.getTables()) {
-			if (tbl.Category.equalsIgnoreCase(category) || (category != null && category.length() > tbl.Category.length()
-					&& tbl.Category.equalsIgnoreCase(category.substring(0, tbl.Category.length())))) {
-				return tbl;
-			}
-		}
-		return null;
-	}
-
 	@Override
 	protected void runNow() throws Exception {
 		PlayerStatsInfo psi = getPlayerInfo();
@@ -73,7 +64,7 @@ public class ShowPlayerStats extends BaseRunnable {
 		
 		Map<String, Long> results = null;
 		if (category != null) {
-			StatsTable report = getStatsTable();
+			StatsTable report = plugin.MySql.findTable(category);
 			if (report == null) {
 				sendMessage(sender, plugin.Config.get("messages.category-not-found", "&cUnable to find a category by that name."));
 				return;

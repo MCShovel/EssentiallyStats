@@ -26,7 +26,7 @@ public abstract class FieldUpdate {
 		val = val.replaceAll("\\+", "Plus");
 		val = val.replaceAll("[^a-zA-Z0-9_]+", "_");
 		int lengthValid = val.length();
-		if (val.charAt(lengthValid - 1) == '_') {
+		if (lengthValid > 0 && val.charAt(lengthValid - 1) == '_') {
 			lengthValid--;
 		}
 		char prev = '_';
