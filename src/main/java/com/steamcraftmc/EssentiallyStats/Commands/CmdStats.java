@@ -123,16 +123,13 @@ public class CmdStats extends BaseCommand implements TabCompleter {
 		
 		if (match != null && completeFields) {
 			if (fullText.length() == match.Category.length()) {
-				plugin.log(Level.INFO, "no space after category");
 				return;
 			}
 			if (fullText.charAt(match.Category.length()) != ' ') {
-				plugin.log(Level.INFO, "no space after category");
 				return;
 			}
 			fullText = fullText.substring(match.Category.length() + 1);
 			split = 1 + fullText.lastIndexOf(' ');
-			plugin.log(Level.INFO, "looking for field '" + fullText + "'");
 			fullText = FieldUpdate.cleanFieldName(fullText.trim());
 
 			Set<String> flds = plugin.MySql.getFields(match);
