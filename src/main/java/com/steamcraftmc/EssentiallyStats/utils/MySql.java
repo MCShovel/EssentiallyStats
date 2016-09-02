@@ -354,28 +354,26 @@ public class MySql {
 		
 		PreparedStatement pst = null;
 		try {
+			partial = PlayerNameUpdate.cleanName(partial);
+			PlayerStatsInfo exact = null;
 	        pst = getConn().prepareStatement(
-	        		preparedSql.replace("{where}", "= '" + PlayerNameUpdate.cleanName(partial) + "'"));
+	        		preparedSql.replace("{where}", "LIKE '" + partial + "%'"));
 			try (ResultSet rs = pst.executeQuery()) {
 				while (rs != null && rs.next()) {
-					results.add(new PlayerStatsInfo(plugin, UUID.fromString(rs.getString(1)), rs.getString(2)));
+					PlayerStatsInfo psi = new PlayerStatsInfo(plugin, UUID.fromString(rs.getString(1)), rs.getString(2)); 
+					results.add(psi);
+					if (psi.name.equalsIgnoreCase(partial)) {
+						exact = psi;
+					}
 				}
 				if (rs != null)
 					rs.close();
 			}
 			pst.close();
 			
-			if (results.size() == 0) {
-		        pst = getConn().prepareStatement(
-		        		preparedSql.replace("{where}", "LIKE '" + PlayerNameUpdate.cleanName(partial) + "%'"));
-    			try (ResultSet rs = pst.executeQuery()) {
-					while (rs != null && rs.next()) {
-						results.add(new PlayerStatsInfo(plugin, UUID.fromString(rs.getString(1)), rs.getString(2)));
-					}
-					if (rs != null)
-						rs.close();
-				}
-				pst.close();
+			if (exact != null) {
+				results.clear();
+				results.add(exact);
 			}
 		}
 		catch(Exception ex) {

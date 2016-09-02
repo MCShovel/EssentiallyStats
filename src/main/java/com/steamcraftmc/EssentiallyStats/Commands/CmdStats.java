@@ -82,8 +82,10 @@ public class CmdStats extends BaseCommand implements TabCompleter {
 			List<String> result = new ArrayList<String>();
 			try {
 				if (args.length == 1) {
-					for (PlayerStatsInfo p : plugin.MySql.lookupPlayerByName(args[0])) {
-						result.add(p.name);
+					if (args[0].length() > 0) {
+						for (PlayerStatsInfo p : plugin.MySql.lookupPlayerByName(args[0])) {
+							result.add(p.name);
+						}
 					}
 				}
 				else if (args.length > 1) {
