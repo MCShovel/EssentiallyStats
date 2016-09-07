@@ -11,3 +11,10 @@ commands:
     permission: essentials.stats
     permission-message: '§4You do not have permission to use this command.'
     default: true
+  rank:
+    description: Check your player's current rank progress.
+    usage: /<command>
+    aliases: []
+    permission: essentials.rank
+    permission-message: '§4You do not have permission to use this command.'
+    default: true
