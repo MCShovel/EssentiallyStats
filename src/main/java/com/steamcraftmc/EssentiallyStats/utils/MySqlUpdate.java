@@ -38,7 +38,8 @@ public class MySqlUpdate {
 			updt.add(update);
 		}
 		else {
-			plugin.log(Level.FINE, "Unable to find stats map for " + update.Namespace);
+			if (!plugin.Config.getBoolean("ignore." + update.Namespace, false))
+				plugin.log(Level.FINE, "Unable to find stats map for " + update.Namespace);
 		}
 	}
 
