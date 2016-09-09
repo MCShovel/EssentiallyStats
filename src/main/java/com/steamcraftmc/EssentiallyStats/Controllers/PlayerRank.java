@@ -60,6 +60,16 @@ public class PlayerRank {
 		return player != null && player.hasPermission(this.permission);
 	}
 	
+	public static List<PlayerRank> getNextRanks(MainPlugin plugin, Player player) {
+		ArrayList<PlayerRank> ranks = new ArrayList<PlayerRank>();
+		for(PlayerRank rank : plugin.Config.getRanks().values()) {
+			if (rank.canAchieveRank(player)) {
+				ranks.add(rank);
+			}
+		}
+		return Collections.unmodifiableList(ranks);
+	}
+
 	public boolean hasPrerequisites(Player player) {
 		if (player == null || this.requires == "!")
 			return false; //error
@@ -73,42 +83,33 @@ public class PlayerRank {
 		return hasPrerequisites(player) && !hasRank(player);
 	}
 
-	public boolean checkRequirements(Player player) {
-		Map<String, PlayerObjective> all = plugin.Config.getObjectives();
-		for (Entry<String, Long> o : this.objectives.entrySet()) {
-			PlayerObjective ob = all.get(o.getKey().toLowerCase());
-			if (ob == null) {
-				plugin.log(Level.SEVERE, "Unable to locate objective " + o.getKey());
-				return false;
-			}
-			if (!ob.check(player, o.getValue())) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public List<String> checkProgress(Player player) {
-		ArrayList<String> lst = new ArrayList<String>();
+	public CheckResults checkRequirements(Player player) {
+		CheckResults results = new CheckResults(new PlayerStatsInfo(plugin, player), this);
 		
 		Map<String, PlayerObjective> all = plugin.Config.getObjectives();
 		for (Entry<String, Long> o : this.objectives.entrySet()) {
 			PlayerObjective ob = all.get(o.getKey().toLowerCase());
+			boolean success = false;
+			String message;
+			long current = 0;
 			if (ob == null) {
 				plugin.log(Level.SEVERE, "Unable to locate objective " + o.getKey());
-				lst.add(ChatColor.RED + o.getKey());
-				continue;
-			}
-			else if (!ob.check(player, o.getValue())) {
-				lst.add(ob.formatIncomplete(player, o.getValue()));
+				success = false;
+				message = plugin.Config.ConfigurationError();
+				current = 0;
 			}
 			else {
-				lst.add(ob.formatComplete(player, o.getValue()));
+				current = ob.currentValue(player);
+				success = current > o.getValue();
+				message = success
+						? ob.formatComplete(player, current, o.getValue())
+						: ob.formatIncomplete(player, current, o.getValue());
 			}
+			results.addResult(success, current, o.getValue(), message);
 		}
-		return lst;
+		return results;
 	}
-	
+
 	public void execForPlayer(Player player) {
     	boolean dropped = false;
     	

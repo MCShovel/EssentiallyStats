@@ -11,6 +11,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
+import com.steamcraftmc.EssentiallyStats.Controllers.CheckResults;
 import com.steamcraftmc.EssentiallyStats.Controllers.PlayerRank;
 import com.steamcraftmc.EssentiallyStats.Controllers.PlayerStatsInfo;
 
@@ -88,12 +89,7 @@ public class CmdRank  extends BaseCommand implements TabCompleter {
 			return;
 		}
 
-		ArrayList<PlayerRank> ranks = new ArrayList<PlayerRank>();
-		for(PlayerRank rank : plugin.Config.getRanks().values()) {
-			if (rank.canAchieveRank(user)) {
-				ranks.add(rank);
-			}
-		}
+		List<PlayerRank> ranks = PlayerRank.getNextRanks(plugin, user);
 		
 		if (ranks.size() == 0) {
 			player.sendMessage(plugin.Config.get("messages.no-more-ranks", "&6You are at the highest rank."));
@@ -104,18 +100,19 @@ public class CmdRank  extends BaseCommand implements TabCompleter {
 			return;
 		}
 		
-		PlayerRank first = ranks.get(0);
+		CheckResults result = ranks.get(0).checkRequirements(user);
+		
 		StringBuilder text = new StringBuilder();
-		text.append(plugin.Config.getTitle(first.Name + " Progress"));
-		for (String line : first.checkProgress(user)) {
+		text.append(plugin.Config.getTitle(result.getRankName() + " Progress"));
+		for (CheckResults.PartialResult r : result.getResults()) {
 			text.append('\n');
-			text.append(line);
+			text.append(r.Message);
 		};
 		player.sendMessage(text.toString());
 		
 		if (player.getUniqueId() == user.getUniqueId()) {
-			if (first.checkRequirements(user)) {
-				first.execForPlayer(user);
+			if (result.isComplete()) {
+				result.complete(user);
 			}
 		}
 	}

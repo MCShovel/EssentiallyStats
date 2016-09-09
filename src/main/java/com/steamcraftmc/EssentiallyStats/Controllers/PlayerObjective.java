@@ -60,14 +60,7 @@ public class PlayerObjective {
 	    		.replace("{name}", this.displayName);
 	}
 
-	public boolean check(Player player, Long value) {
-		Long current = currentValue(player);
-		if (current == null || value == null || current < value) {
-			return false;
-		}
-		return true;
-	}
-
+	
 	public long currentValue(Player player) {
 		if (this.table == null || player == null) {
 			return 0L;
@@ -90,9 +83,7 @@ public class PlayerObjective {
 	}
 	
 	
-	public String formatIncomplete(Player player, Long required) {
-		Long current = currentValue(player);
-		
+	public String formatIncomplete(Player player, Long current, Long required) {
 		String valueText = String.valueOf(current);
 		String targetText = String.valueOf(required);
 		
@@ -111,9 +102,7 @@ public class PlayerObjective {
 				;
 	}
 
-	public String formatComplete(Player player, Long required) {
-		Long current = currentValue(player);
-		
+	public String formatComplete(Player player, Long current, Long required) {
 		String valueText = String.valueOf(current);
 		String targetText = String.valueOf(required);
 		

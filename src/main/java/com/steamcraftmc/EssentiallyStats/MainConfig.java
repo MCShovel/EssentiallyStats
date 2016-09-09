@@ -44,7 +44,7 @@ public class MainConfig  extends BaseYamlSettingsFile {
 	}
 
 	public boolean bungeeSupport() {
-		return getBoolean("settings.useBungeeCord", false);
+		return getBoolean("settings.bungeecord", false);
 	}
 	
 	public String getBungeeServerName() throws InvalidConfigurationException {
