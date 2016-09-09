@@ -18,6 +18,67 @@ settings:
   updateInterval: 6000
   # Used to control which stats group is displayed by default
   defaultCategory: 'Player Stats'
+  # Controls the output lines sent
+  page-size: 18
+  top: 10
+  # Used to broadcast announcements across all bungee servers
+  bungeecord: true
+
+ranks:
+  Initiate:
+    #How we tell if they are already an initiate:
+    permission: permgroup.initiate
+    #requires: 'Everyone'
+    objectives:
+      vaturainv: 1
+    announce: ''
+    message: ''
+    actions:
+      # assign the next group with your permissions plugin
+      - '/bp user @p addgroup Conscript'
+      # see http://www.theredengineer.com/1.9-playsound-list.html
+      - '/playsound entity.wither.death block @p @x @y @z 15 2'
+      # see http://www.minecraftupdates.com/fireworks
+      - '/summon FireworksRocketEntity ~ ~ ~ {LifeTime:20,FireworksItem:{id:fireworks,Count:1,tag:{Fireworks:{Explosions:[{Type:1,Flicker:0,Trail:0,Colors:[16712965],FadeColors:[16777215]}]}}}}'
+      # see https://minecraftcommand.science/title-generator
+      - '/title @p times 20 100 20'
+      - '/title @p subtitle {"text":"You may now use /kit Conscript","color":"gray"}'
+      - '/title @p title {"text":"Congratulations!","color":"aqua","bold":true}'
+  Conscript:
+    objectives:
+    requires: Initiate
+    announce: ''
+    message: ''
+    actions:
+      - ''
+
+
+objectives:
+  vaturainv:
+    world: vatura
+    type: stat
+    value: 'achievement.openInventory'
+    inccomplete: '&4✘ &6Visit the surival world &fVatura&6.'
+    completed: '&2✔ &6Visited the surival world &7Vatura&6.'
+  playtime:
+    world: all
+    type: stat
+    value: 'stat.playOneMinute'
+    inccomplete: '&4✘ &6Time Online: &c{value}&6, needed: &f{target}&6.'
+    completed: '&2✔ &6Time Online: &2{value}&6, needed: &7{target}&6.'
+  blocksbroken:
+    world: all
+    type: aggregate
+    value: 'Blocks Broken'
+    inccomplete: '&4✘ &6Block Broken: &f{value}&6 of &f{target}&6.'
+    completed: '&2✔ &6Block Broken: &f{value}&6 of &7{target}&6.'
+  blocksplaced:
+    world: all
+    type: aggregate
+    value: 'Blocks Placed'
+    inccomplete: '&4✘ &6Block Placed: &f{value}&6 of &f{target}&6.'
+    completed: '&2✔ &6Block Placed: &f{value}&6 of &7{target}&6.'
+
 
 tables:
   estats_playerStats:
@@ -121,3 +182,17 @@ messages:
   no-console: '&4Command should be used by a player.'
   no-access: '&4You do not have permission to this command.'
   player-not-found: '&cPlayer not found.'
+  reloaded: '&6Configuration reloaded.'
+  summary-title: Category Summary
+  summary-footer: '&7* use /stats {name} &7&o(Category)&r&7 for more detail'
+  report-header: '&6============== [&f{title}&6] =============='
+  report-line: '&6{name}: &f{value}'
+  see-details: (see details)
+  report-footer: '&7* Stats for user {name}&7'
+  report-page-num: ' &7[Page {page} of {count}]'
+  import-start: '&6Import started.'
+  import-end: '&6Import completed, {count} records imported.'
+  internal-error: '&cAn error occurred while processing this request.'
+  category-not-found: '&cUnable to find a category by that name.'
+  field-not-found: '&cUnable to find a field called ''{name}''.'
+  rank-desc-format: '&6{name}: &8{desc}.'

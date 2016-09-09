@@ -132,7 +132,7 @@ public class MySql {
     }
 
 	public StatsTable findTable(String categoryText) {
-		for (StatsTable t : plugin.MySql.getTables()) {
+		for (StatsTable t : getTables()) {
 			if (categoryText.length() >= t.Category.length()) {
 				if (categoryText.substring(0, t.Category.length()).equalsIgnoreCase(t.Category))
 					return t;
@@ -143,9 +143,20 @@ public class MySql {
 
 	public String findTableField(StatsTable t, String fieldText) {
 		fieldText = FieldUpdate.cleanFieldName(fieldText.trim());
-		Set<String> flds = plugin.MySql.getFields(t);
+		Set<String> flds = getFields(t);
 		if (flds.contains(fieldText)) {
 			return fieldText;
+		}
+		return null;
+	}
+
+	public StatsTable findTableField(FieldInformation fi) {
+		for (StatsTable t : getTables()) {
+			if (t.Namespace.equalsIgnoreCase(fi.Namespace)) {
+				if (t.isMatch(fi.FieldName)) {
+					return t;
+				}
+			}
 		}
 		return null;
 	}
@@ -391,7 +402,7 @@ public class MySql {
 		return results;
 	}
 
-	public List<Map<String, Long>> fetchAllStats(UUID uniqueId, StatsTable tbl) {
+	public List<Map<String, Long>> fetchAllStats(UUID uniqueId, StatsTable tbl, String serverName) {
 		HashSet<String> ignore = new HashSet<String>();
 		ignore.add("uuid");
 		ignore.add("player_name");
@@ -401,8 +412,13 @@ public class MySql {
 		List<Map<String, Long>> results = new ArrayList<Map<String, Long>>();
 		PreparedStatement pst = null;
 		try {
+			String serverFilter = "";
+			if (serverName != null && !serverName.equalsIgnoreCase("all") && !serverName.equalsIgnoreCase("%")) {
+				serverFilter = " AND server = '" + serverName.replaceAll("[^\\w]+", "") + "'";
+			}
+			
 	        pst = getConn().prepareStatement("SELECT * FROM `" + tbl.TableName + "` "
-					+ "WHERE uuid = '" + uniqueId + "';");
+					+ "WHERE uuid = '" + uniqueId + "'" + serverFilter + ";");
 
 			try (ResultSet rs = pst.executeQuery()) {
 				if (rs != null) {

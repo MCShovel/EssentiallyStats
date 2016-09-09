@@ -17,6 +17,7 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
 	private WorldEvents _listener;
 	public Boolean _exLogging;
 	public final MainConfig Config;
+	public final BungeeBroadcast Broadcast;
 	public final MySql MySql;
 	private String bungeeServerName;
 
@@ -28,7 +29,8 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
 		
 		Config = new MainConfig(this);
 		Config.load();
-		this.MySql = new MySql(this); 
+		this.MySql = new MySql(this);
+		Broadcast = new BungeeBroadcast(this);
 	}
 
 	public void log(Level level, String text) {
@@ -44,12 +46,22 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
         
     	_listener = new WorldEvents(this);
     	_listener.start();
+    	Broadcast.start();
     	
     	new com.steamcraftmc.EssentiallyStats.Commands.CmdStats(this);
+    	new com.steamcraftmc.EssentiallyStats.Commands.CmdRank(this);
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
         log(Level.INFO, "Plugin listening for events.");
+        
+        final MainConfig cfg = this.Config;
+        this.getServer().getScheduler().runTaskLater(this, new Runnable() {
+			@Override
+			public void run() {
+				cfg.getRanks();
+				cfg.getObjectives();
+			}}, 2000);
     }
 
 
@@ -83,6 +95,7 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
     @Override
     public void onDisable() {
     	_listener.stop();
+    	Broadcast.stop();
     }
 
 	public void reload() {

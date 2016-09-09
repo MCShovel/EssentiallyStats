@@ -72,7 +72,7 @@ public class ShowPlayerStats extends BaseRunnable {
 			title = report.Category;
 			footer = plugin.Config.format("messages.report-footer", "&7* Stats for user {name}&7", "name", psi.name);
 			formatter = report;
-			results = report.aggregateReport(psi, true);
+			results = report.aggregateReport(psi, true, null);
 		}
 		else { // Default summary
 			title = plugin.Config.get("messages.summary-title", "Category Summary");
@@ -81,7 +81,7 @@ public class ShowPlayerStats extends BaseRunnable {
 			results = new HashMap<String, Long>();
 			for (StatsTable tbl : plugin.MySql.getTables()) {
 				if (tbl.canSummarize()) {
-					results.put(tbl.Category, tbl.getSummaryCount(psi));
+					results.put(tbl.Category, tbl.getSummaryCount(psi, null));
 				}
 				else {
 					results.put(tbl.Category, null);

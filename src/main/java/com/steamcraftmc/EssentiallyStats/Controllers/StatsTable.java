@@ -119,17 +119,17 @@ public class StatsTable {
     	return sb.toString();
 	}
 	
-	public Long getSummaryCount(PlayerStatsInfo psi) {
+	public Long getSummaryCount(PlayerStatsInfo psi, String serverName) {
 		Long result = 0L;
-		Map<String, Long> rs = aggregateReport(psi, false);
+		Map<String, Long> rs = aggregateReport(psi, false, serverName);
 		for (Entry<String, Long> i : rs.entrySet()) {
 			result += i.getValue();
 		}
 		return result;
 	}
 	
-	public Map<String, Long> aggregateReport(PlayerStatsInfo psi, boolean useDisplayNames) {
-		List<Map<String, Long>> all = plugin.MySql.fetchAllStats(psi.uniqueId, this);
+	public Map<String, Long> aggregateReport(PlayerStatsInfo psi, boolean useDisplayNames, String serverName) {
+		List<Map<String, Long>> all = plugin.MySql.fetchAllStats(psi.uniqueId, this, serverName);
 		HashMap<String, Long> results = new HashMap<String, Long>();
 		for (Map<String, Long> rs : all) {
 			for (Entry<String, Long> i : rs.entrySet()) {
