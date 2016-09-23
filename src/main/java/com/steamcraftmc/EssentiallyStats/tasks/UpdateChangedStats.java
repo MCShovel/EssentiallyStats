@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import com.steamcraftmc.EssentiallyStats.MainPlugin;
 import com.steamcraftmc.EssentiallyStats.Controllers.PlayerStatsInfo;
+import com.steamcraftmc.EssentiallyStats.utils.ApplyMinValue;
 import com.steamcraftmc.EssentiallyStats.utils.MySqlUpdate;
 import com.steamcraftmc.EssentiallyStats.utils.MyTransaction;
 import com.steamcraftmc.EssentiallyStats.utils.UpdateStatValue;
@@ -36,9 +37,10 @@ public class UpdateChangedStats  extends BaseRunnable {
 			String name =e.getKey();
 			Long val = e.getValue();
 			Long old = prev.get(e.getKey());
-			if (old == null) old = 0L;
-
-			if (old < val) {
+			if (old == null) {
+				update.add(new ApplyMinValue(name, val));
+			}
+			else if (old < val) {
 				update.add(new UpdateStatValue(name, val, val - old));
 			}
 		}

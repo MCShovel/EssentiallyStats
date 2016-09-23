@@ -76,11 +76,12 @@ public class PlayerStatsInfo {
 		if (stats.Parse()) {
 			Map<String, Long> oldStats = prevStats; 
 			Map<String, Long> newStats = stats.getStats();
-
-			new UpdateChangedStats(plugin, this, oldStats, newStats)
-				.apply(trans);
-
-			prevStats = newStats;
+			if (newStats != null && newStats.size() > 0) {
+				new UpdateChangedStats(plugin, this, oldStats, newStats)
+					.apply(trans);
+	
+				prevStats = newStats;
+			}
 		}
 	}
 }
