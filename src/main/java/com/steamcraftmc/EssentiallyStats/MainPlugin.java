@@ -30,7 +30,7 @@ public class MainPlugin extends JavaPlugin implements PluginMessageListener {
 		Config = new MainConfig(this);
 		Config.load();
 		this.MySql = new MySql(this);
-		Broadcast = new BungeeBroadcast(this);
+		Broadcast = new BungeeBroadcast(this, this.getName());
 	}
 
 	public void log(Level level, String text) {

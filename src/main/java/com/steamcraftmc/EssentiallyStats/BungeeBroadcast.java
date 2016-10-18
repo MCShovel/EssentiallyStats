@@ -9,11 +9,13 @@ import com.google.common.io.ByteStreams;
 
 public class BungeeBroadcast implements PluginMessageListener {
 	
-	private MainPlugin plugin;
+	private final MainPlugin plugin;
+	private final String subchannel;
 	private boolean bungeecord;
 
-	public BungeeBroadcast(MainPlugin plugin) {
+	public BungeeBroadcast(MainPlugin plugin, String subchannel) {
 		this.plugin = plugin;
+		this.subchannel = subchannel;
 	}
 
 	public void start() {
@@ -48,7 +50,7 @@ public class BungeeBroadcast implements PluginMessageListener {
 	        
 	        out.writeUTF("Forward");
 	        out.writeUTF("ONLINE");
-	        out.writeUTF("HACX");
+	        out.writeUTF(this.subchannel);
 
 	        ByteArrayDataOutput msg = ByteStreams.newDataOutput();
 	        msg.writeUTF(permission + ":" + message);
@@ -69,7 +71,7 @@ public class BungeeBroadcast implements PluginMessageListener {
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF();
 
-		if (subchannel.equals("HACX")) {
+		if (subchannel.equals(this.subchannel)) {
 			int size = in.readShort();
 			byte[] msgbytes = new byte[size];
 			in.readFully(msgbytes);
